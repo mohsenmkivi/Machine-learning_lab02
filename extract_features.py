@@ -50,17 +50,18 @@ def read_document(filename, voc):
 voc = load_vocabulary("vocabulary.txt")
 documents = []
 labels = []
-for f in os.listdir("smalltrain/pos"):
-    documents.append(read_document("smalltrain/pos/" + f, voc))
+for f in os.listdir("aclImdb/aclImdb/smalltrain/pos"):
+    documents.append(read_document("aclImdb/aclImdb/smalltrain/pos/" + f, voc))
     labels.append(1)
-for f in os.listdir("smalltrain/neg"):
-    documents.append(read_document("smalltrain/neg/" + f, voc))
+for f in os.listdir("aclImdb/aclImdb/smalltrain/neg"):
+    documents.append(read_document("aclImdb/aclImdb/smalltrain/neg/" + f, voc))
     labels.append(0)
 # np.stack transforms the list of vectors into a 2D array.
 X = np.stack(documents)
 Y = np.array(labels)
+print(X)
 # The following line append the labels Y as additional column of the
 # array of features so that it can be passed to np.savetxt.
 data = np.concatenate([X, Y[:, None]], 1)
-np.savetxt("train.txt.gz", data)
+np.savetxt("train1.txt.gz", data)
 

@@ -24,7 +24,7 @@ def inference_nb(X, w, b):
 
 # The script loads the training data and train a classifier.  It must
 # be extended to evaluate the classifier on the test set.
-data = np.loadtxt("train.txt.gz")
+data = np.loadtxt("train1.txt.gz")
 X = data[:, :-1]
 Y = data[:, -1]
 w, b = train_nb(X, Y)
