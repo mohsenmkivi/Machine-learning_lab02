@@ -38,4 +38,4 @@ for f in os.listdir("aclImdb/aclImdb/smalltrain/pos"):
     voc.update(read_document("aclImdb/aclImdb/smalltrain/pos/" + f))
 for f in os.listdir("aclImdb/aclImdb/smalltrain/neg"):
     voc.update(read_document("aclImdb/aclImdb/smalltrain/neg/" + f))
-write_vocabulary(voc, "vocabulary.txt", 1000)
+write_vocabulary(voc, "vocabulary_big.txt", 10000)

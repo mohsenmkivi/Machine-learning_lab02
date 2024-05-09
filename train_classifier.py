@@ -1,5 +1,5 @@
 import numpy as np
-
+import svm
 
 def train_nb(X, Y):
     """Train a binary NB classifier."""
@@ -21,10 +21,11 @@ def inference_nb(X, w, b):
     logits = X @ w + b
     return (logits > 0).astype(int)
 
+"""
 
 # The script loads the training data and train a classifier.  It must
 # be extended to evaluate the classifier on the test set.
-data = np.loadtxt("big_train.txt.gz")
+data = np.loadtxt("train1.txt.gz")
 X = data[:, :-1]
 Y = data[:, -1]
 w, b = train_nb(X, Y)
@@ -34,7 +35,7 @@ print("Training accuracy:", accuracy * 100)
 
 
 # This part detects the most relevant words for the classifier.
-f = open("vocabulary.txt")
+f = open("vocabulary_big.txt")
 voc = f.read().split()
 f.close()
 
@@ -42,12 +43,25 @@ indices = w.argsort()
 print("NEGATIVE WORDS")
 for i in indices[:20]:
     print(voc[i], w[i])
-###
-#print("POSITIVE WORDS")
-#for i in indices[-20:]:
- #   print(voc[i], w[i])
 
-data_test = np.loadtxt("test.txt.gz")
+print("POSITIVE WORDS")
+for i in indices[-20:]:
+    print(voc[i], w[i])
+"""
+
+# This part train  model using SVM.
+
+data = np.loadtxt("train1.txt.gz")
+X = data[:, :-1]
+Y = data[:, -1]
+w, b = svm_train(X, Y)
+predictions = svm_inference(X, w, b)[0]
+accuracy = (predictions == Y).mean()
+print("Training accuracy:", accuracy * 100)
+
+"""
+
+data_test = np.loadtxt("test_big_vocab.txt.gz")
 X_test = data_test[:, :-1]
 Y_test = data_test[:, -1]
 predictions_test = inference_nb(X_test, w, b)[0]
@@ -66,3 +80,4 @@ indices_valid = w.argsort()
 print("NEGATIVE WORDS")
 for i in indices_valid[:20]:
     print(voc[i])
+"""

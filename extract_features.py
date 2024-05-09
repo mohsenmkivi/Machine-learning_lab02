@@ -47,14 +47,14 @@ def read_document(filename, voc):
 # The script compute the BoW representation of all the training
 # documents.  This need to be extended to compute similar
 # representations for the validation and the test set.
-voc = load_vocabulary("vocabulary.txt")
+voc = load_vocabulary("vocabulary_big.txt")
 documents = []
 labels = []
-for f in os.listdir("aclImdb/aclImdb/train/pos"):
-    documents.append(read_document("aclImdb/aclImdb/train/pos/" + f, voc))
+for f in os.listdir("aclImdb/aclImdb/smalltrain/pos"):
+    documents.append(read_document("aclImdb/aclImdb/smalltrain/pos/" + f, voc))
     labels.append(1)
-for f in os.listdir("aclImdb/aclImdb/train/neg"):
-    documents.append(read_document("aclImdb/aclImdb/train/neg/" + f, voc))
+for f in os.listdir("aclImdb/aclImdb/smalltrain/neg"):
+    documents.append(read_document("aclImdb/aclImdb/smalltrain/neg/" + f, voc))
     labels.append(0)
 # np.stack transforms the list of vectors into a 2D array.
 X_train = np.stack(documents)
@@ -62,8 +62,8 @@ Y_train = np.array(labels)
 # The following line append the labels Y as additional column of the
 # array of features so that it can be passed to np.savetxt.
 data = np.concatenate([X_train, Y_train[:, None]], 1)
-np.savetxt("big_train.txt.gz", data)
-
+np.savetxt("small_train_big_vocab.txt.gz", data)
+"""
 documents = []
 labels = []
 for f in os.listdir("aclImdb/aclImdb/validation/pos"):
@@ -79,7 +79,7 @@ Y_validation = np.array(labels)
 # array of features so that it can be passed to np.savetxt.
 data = np.concatenate([X_validation, Y_validation[:, None]], 1)
 np.savetxt("validation.txt.gz", data)
-
+"""
 documents = []
 labels = []
 for f in os.listdir("aclImdb/aclImdb/test/pos"):
@@ -94,4 +94,4 @@ Y_test = np.array(labels)
 # The following line append the labels Y as additional column of the
 # array of features so that it can be passed to np.savetxt.
 data = np.concatenate([X_test, Y_test[:, None]], 1)
-np.savetxt("test.txt.gz", data)
+np.savetxt("test_big_vocab.txt.gz", data)
