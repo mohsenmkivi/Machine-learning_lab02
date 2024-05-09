@@ -1,7 +1,5 @@
 import numpy as np
 
-
-
 def _check_size(spec, *xs):
     """Check that the arrays respect the specification.
 
@@ -66,8 +64,15 @@ def _check_categorical(X):
     if X.min() < 0:
         raise ValueError("Categorical data cannot be negative")
     return X
-def svm_inference(X, w, b):
-    """SVM prediction of the class labels.
+
+def log_nowarn(x):
+    """Compute the logarithm without warnings in case of zeros."""
+    with np.errstate(divide='ignore'):
+        return np.log(x)
+
+
+def logreg_inference(X, w, b):
+    """Predict class probabilities.
 
     Parameters
     ----------
@@ -81,20 +86,90 @@ def svm_inference(X, w, b):
     Returns
     -------
     ndarray, shape (m,)
-        predicted labels (one per feature vector).
-    ndarray, shape (m,)
-        classification scores (one per feature vector).
+        probability estimates (one per feature vector).
     """
     X = np.asarray(X)
     w = np.asarray(w)
     _check_size("mn, n, *", X, w, b)
     logits = X @ w + b
-    labels = (logits > 0).astype(int)
-    return labels, logits
+    return sigmoid(logits)
 
 
-def svm_train(X, Y, lambda_, lr=1e-3, steps=1000, init_w=None, init_b=0):
-    """Train a binary SVM classifier.
+def binary_cross_entropy(Y, P):
+    """Average cross entropy.
+
+    Parameters
+    ----------
+    Y : ndarray, shape (m,)
+        binary target labels (0 or 1).
+    P : ndarray, shape (m,)
+        probability estimates.
+
+    Returns
+    -------
+    float
+        average cross entropy.
+    """
+    Y = np.asarray(Y).astype(int)
+    P = np.asarray(P)
+    _check_size("m, m", Y, P)
+    Y = _check_labels(Y, 2)
+    log1 = log_nowarn(P)
+    log0 = log_nowarn(1 - P)
+    e = -log1[Y == 1].sum() - log0[Y == 0].sum()
+    return e / Y.size
+
+
+def logreg_train(X, Y, lambda_, lr=1e-3, steps=1000, init_w=None,
+                 init_b=0):
+    """Train a binary classifier based on L2-regularized logistic regression.
+
+    Parameters
+    ----------
+
+    X : ndarray, shape (m, n)
+        training features.
+    Y : ndarray, shape (m,)
+        binary training labels.
+    lambda_ : float
+        regularization coefficient.
+    lr : float
+        learning rate.
+    steps : int
+        number of training steps.
+    init_w : ndarray, shape (n,)
+        initial weights (None for zero initialization)
+    init_b : float
+        initial bias
+
+    Returns
+    -------
+
+    w : ndarray, shape (n,)
+        learned weight vector.
+    b : float
+        learned bias.
+    """
+    Y = np.asarray(Y).astype(int)
+    X = np.asarray(X)
+    if init_w is not None:
+        init_w = np.asfarray(init_w)
+    _check_size("mn, m, n?, *", X, Y, init_w, init_b)
+    Y = _check_labels(Y, 2)
+    m, n = X.shape
+    w = (init_w if init_w is not None else np.zeros(n))
+    b = init_b
+    for step in range(steps):
+        P = logreg_inference(X, w, b)
+        grad_w = ((P - Y) @ X) / m + 2 * lambda_ * w
+        grad_b = (P - Y).mean()
+        w -= lr * grad_w
+        b -= lr * grad_b
+    return w, b
+
+
+def logreg_l1_train(X, Y, lambda_, lr=1e-3, steps=1000, init_w=None, init_b=0):
+    """Train a binary classifier based on L1-regularized logistic regression.
 
     Parameters
     ----------
@@ -105,13 +180,11 @@ def svm_train(X, Y, lambda_, lr=1e-3, steps=1000, init_w=None, init_b=0):
     lambda_ : float
         regularization coefficient.
     lr : float
-        learning rate
+        learning rate.
     steps : int
-        number of training steps
-    init_w : ndarray, shape (n,)
-        initial weights (None for zero initialization)
-    init_b : float
-        initial bias
+        number of training steps.
+    loss : ndarray, shape (steps,)
+        loss value after each training step.
 
     Returns
     -------
@@ -129,35 +202,27 @@ def svm_train(X, Y, lambda_, lr=1e-3, steps=1000, init_w=None, init_b=0):
     m, n = X.shape
     w = (init_w if init_w is not None else np.zeros(n))
     b = init_b
-    C = (2 * Y) - 1
     for step in range(steps):
-        labels, logits = svm_inference(X, w, b)
-        hinge_diff = -C * ((C * logits) < 1)
-        grad_w = (hinge_diff @ X) / m + lambda_ * w
-        grad_b = hinge_diff.mean()
+        P = logreg_inference(X, w, b)
+        grad_w = ((P - Y) @ X) / m + lambda_ * np.sign(w)
+        grad_b = (P - Y).mean()
         w -= lr * grad_w
         b -= lr * grad_b
     return w, b
 
 
-def hinge_loss(labels, logits):
-    """Average hinge loss.
+def sigmoid(z):
+    """Elementwise sigmoid function.
 
     Parameters
     ----------
-    labels : ndarray, shape (m,)
-        binary target labels (0 or 1).
-    logits : ndarray, shape (m,)
-        classification scores (logits).
+    z : ndarray
+         input
 
     Returns
     -------
-    float
-        average hinge loss.
+    ndarray, (same shape of z)
+        the sigmoid of z
     """
-    labels = np.asarray(labels).astype(int)
-    logits = np.asarray(logits)
-    _check_size("m, m", labels, logits)
-    labels = _check_labels(labels, 2)
-    loss = np.maximum(0, 1 - (2 * labels - 1) * logits)
-    return loss.mean()
+    z = np.asarray(z)
+    return 1 / (1 + np.exp(-z))

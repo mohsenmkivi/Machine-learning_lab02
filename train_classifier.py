@@ -1,5 +1,6 @@
 import numpy as np
-import svm
+from svm import *
+from logistic_regression import *
 
 def train_nb(X, Y):
     """Train a binary NB classifier."""
@@ -54,10 +55,19 @@ for i in indices[-20:]:
 data = np.loadtxt("train1.txt.gz")
 X = data[:, :-1]
 Y = data[:, -1]
-w, b = svm_train(X, Y)
+w, b = svm_train(X, Y,1e-4)
 predictions = svm_inference(X, w, b)[0]
 accuracy = (predictions == Y).mean()
-print("Training accuracy:", accuracy * 100)
+print("SVM Training accuracy:", accuracy * 100)
+
+data = np.loadtxt("train1.txt.gz")
+
+X = data[:, :1000]
+Y = data[:, 1000]
+w, b = logreg_train(X, Y,1e-4)
+p = logreg_inference(X, w, b)
+n = 1 - sum(Y, p) / 25000
+print("training accuracy is", n * 100, "%")
 
 """
 
