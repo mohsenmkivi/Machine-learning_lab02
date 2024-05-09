@@ -24,7 +24,7 @@ def inference_nb(X, w, b):
 
 # The script loads the training data and train a classifier.  It must
 # be extended to evaluate the classifier on the test set.
-data = np.loadtxt("train1.txt.gz")
+data = np.loadtxt("big_train.txt.gz")
 X = data[:, :-1]
 Y = data[:, -1]
 w, b = train_nb(X, Y)
@@ -42,9 +42,27 @@ indices = w.argsort()
 print("NEGATIVE WORDS")
 for i in indices[:20]:
     print(voc[i], w[i])
+###
+#print("POSITIVE WORDS")
+#for i in indices[-20:]:
+ #   print(voc[i], w[i])
 
-print()
-print("POSITIVE WORDS")
-for i in indices[-20:]:
-    print(voc[i], w[i])
+data_test = np.loadtxt("test.txt.gz")
+X_test = data_test[:, :-1]
+Y_test = data_test[:, -1]
+predictions_test = inference_nb(X_test, w, b)[0]
 
+accuracy_test = (predictions_test == Y_test).mean()
+print("Testing accuracy:", accuracy_test * 100)
+
+data_valid = np.loadtxt("validation.txt.gz")
+X_validation = data_valid[:, :-1]
+Y_validation = data_valid[:, -1]
+predictions_valid = inference_nb(X_validation, w, b)[0]
+accuracy_valid = (predictions_valid == Y_validation).mean()
+print("Validating accuracy:", accuracy_valid * 100)
+
+indices_valid = w.argsort()
+print("NEGATIVE WORDS")
+for i in indices_valid[:20]:
+    print(voc[i])

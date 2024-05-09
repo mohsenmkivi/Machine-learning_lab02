@@ -50,18 +50,48 @@ def read_document(filename, voc):
 voc = load_vocabulary("vocabulary.txt")
 documents = []
 labels = []
-for f in os.listdir("aclImdb/aclImdb/smalltrain/pos"):
-    documents.append(read_document("aclImdb/aclImdb/smalltrain/pos/" + f, voc))
+for f in os.listdir("aclImdb/aclImdb/train/pos"):
+    documents.append(read_document("aclImdb/aclImdb/train/pos/" + f, voc))
     labels.append(1)
-for f in os.listdir("aclImdb/aclImdb/smalltrain/neg"):
-    documents.append(read_document("aclImdb/aclImdb/smalltrain/neg/" + f, voc))
+for f in os.listdir("aclImdb/aclImdb/train/neg"):
+    documents.append(read_document("aclImdb/aclImdb/train/neg/" + f, voc))
     labels.append(0)
 # np.stack transforms the list of vectors into a 2D array.
-X = np.stack(documents)
-Y = np.array(labels)
-print(X)
+X_train = np.stack(documents)
+Y_train = np.array(labels)
 # The following line append the labels Y as additional column of the
 # array of features so that it can be passed to np.savetxt.
-data = np.concatenate([X, Y[:, None]], 1)
-np.savetxt("train1.txt.gz", data)
+data = np.concatenate([X_train, Y_train[:, None]], 1)
+np.savetxt("big_train.txt.gz", data)
 
+documents = []
+labels = []
+for f in os.listdir("aclImdb/aclImdb/validation/pos"):
+    documents.append(read_document("aclImdb/aclImdb/validation/pos/" + f, voc))
+    labels.append(1)
+for f in os.listdir("aclImdb/aclImdb/validation/neg"):
+    documents.append(read_document("aclImdb/aclImdb/validation/neg/" + f, voc))
+    labels.append(0)
+# np.stack transforms the list of vectors into a 2D array.
+X_validation = np.stack(documents)
+Y_validation = np.array(labels)
+# The following line append the labels Y as additional column of the
+# array of features so that it can be passed to np.savetxt.
+data = np.concatenate([X_validation, Y_validation[:, None]], 1)
+np.savetxt("validation.txt.gz", data)
+
+documents = []
+labels = []
+for f in os.listdir("aclImdb/aclImdb/test/pos"):
+    documents.append(read_document("aclImdb/aclImdb/test/pos/" + f, voc))
+    labels.append(1)
+for f in os.listdir("aclImdb/aclImdb/test/neg"):
+    documents.append(read_document("aclImdb/aclImdb/test/neg/" + f, voc))
+    labels.append(0)
+# np.stack transforms the list of vectors into a 2D array.
+X_test = np.stack(documents)
+Y_test = np.array(labels)
+# The following line append the labels Y as additional column of the
+# array of features so that it can be passed to np.savetxt.
+data = np.concatenate([X_test, Y_test[:, None]], 1)
+np.savetxt("test.txt.gz", data)
